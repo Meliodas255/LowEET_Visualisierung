@@ -15,7 +15,7 @@ public class NoFlightZoneVisualizer : MonoBehaviour
     public Transform globeTransform;
     public float CornerAltDistance = 1000;
     private CesiumGlobeAnchor globeAnchor;
-
+    float wallRotationAlt = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -33,8 +33,7 @@ public class NoFlightZoneVisualizer : MonoBehaviour
         float corner0latitude;
         float corner0altitude;
 
-        float distanceBetweenCorners;
-        float wallWidth = 100;
+        float wallWidth;
 
         //create lower corners
         for(int i = 0; i < cornerCoordinateData.Length; i++) {
@@ -55,7 +54,7 @@ public class NoFlightZoneVisualizer : MonoBehaviour
             arUpperCorner[i] = UpperCorner;
         };
 
-        // no idea, doesn´t work without
+        // corner 0 Coordinates get overwritten somehow, saving them here for further use
         corner0longitude = cornerCoordinateData[0].longitude;
         corner0latitude = cornerCoordinateData[0].latitude;
         corner0altitude = cornerCoordinateData[0].altitude;
@@ -68,72 +67,45 @@ public class NoFlightZoneVisualizer : MonoBehaviour
             wallCoordinateData[i].altitude = cornerCoordinateData[i].altitude-(CornerAltDistance/2);
         }
 
-        wallCoordinateData[4] = cornerCoordinateData[4];
-        wallCoordinateData[4].longitude = corner0longitude + (cornerCoordinateData[4].longitude - corner0longitude)/2;
-        wallCoordinateData[4].latitude = corner0latitude + (cornerCoordinateData[4].latitude - corner0latitude)/2;
-        wallCoordinateData[4].altitude = corner0altitude-(CornerAltDistance/2);
+        // calculate wall coordinates of last wall in array
+        wallCoordinateData[wallCoordinateData.Length-1] = cornerCoordinateData[cornerCoordinateData.Length-1];
+        wallCoordinateData[wallCoordinateData.Length-1].longitude = corner0longitude + (cornerCoordinateData[cornerCoordinateData.Length-1].longitude - corner0longitude)/2;
+        wallCoordinateData[wallCoordinateData.Length-1].latitude = corner0latitude + (cornerCoordinateData[cornerCoordinateData.Length-1].latitude - corner0latitude)/2;
+        wallCoordinateData[wallCoordinateData.Length-1].altitude = corner0altitude-(CornerAltDistance/2);
 
-        /*
         // create walls 
         for(int i = 0; i < wallCoordinateData.Length; i++) {
             GameObject Wall = Instantiate(NoFlightWallPrefab);
             Wall.transform.SetParent(globeTransform, false);
 
+            // wallWidth = distance between corners
+            if (i == wallCoordinateData.Length-1) {
+                wallWidth = Vector3.Distance (arLowCorner[0].transform.position, arLowCorner[arLowCorner.Length-1].transform.position);  
+            }
+            else {
+                wallWidth = Vector3.Distance (arLowCorner[i].transform.position, arLowCorner[i+1].transform.position);  
+            }
 
+            // scaling of walls
+            Wall.transform.localScale = new Vector3(wallWidth, CornerAltDistance, 100f);
+
+            /*
+            // calculate rotation of wall (not used because calculated values don't make sense)
+            if (i == wallCoordinateData.Length-1) {
+                wallRotationAlt = math.atan2(cornerCoordinateData[0].latitude-cornerCoordinateData[cornerCoordinateData.Length-1].latitude, cornerCoordinateData[0].longitude-cornerCoordinateData[cornerCoordinateData.Length-1].longitude)*(360/(2*math.PI));
+            }
+            else {
+                wallRotationAlt = math.atan2(cornerCoordinateData[i+1].latitude-cornerCoordinateData[i].latitude ,cornerCoordinateData[i+1].longitude-cornerCoordinateData[i].longitude)*(360/(2*math.PI));
+            }
+            Debug.Log(wallRotationAlt);
+            */
             
 
-            Wall.transform.localScale = new Vector3(wallWidth, CornerAltDistance, 100f);
             Wall.name = "Wall " + i + " " + wallCoordinateData[i].longitude + ", " + wallCoordinateData[i].latitude + ", " + wallCoordinateData[i].altitude;
             AddCesiumGlobeAnchor(Wall, wallCoordinateData[i], 0);
             arWalls[i] = Wall;
         }
-        */
-        // manuelle Version für Präsentation
-        GameObject Wall_0 = Instantiate(NoFlightWallPrefab);
-        Wall_0.transform.SetParent(globeTransform, false);
-        Wall_0.transform.localScale = new Vector3(1600f, CornerAltDistance, 100f);
-        Wall_0.name = "Wall " + 0 + " " + wallCoordinateData[0].longitude + ", " + wallCoordinateData[0].latitude + ", " + wallCoordinateData[0].altitude;
-        AddCesiumGlobeAnchor(Wall_0, wallCoordinateData[0], 0);
-        CesiumGlobeAnchor cesiumanchor0 = Wall_0.GetComponent<CesiumGlobeAnchor>();
-        cesiumanchor0.rotationEastUpNorth = Quaternion.Euler(0, -19, 0);
-
-        GameObject Wall_1 = Instantiate(NoFlightWallPrefab);
-        Wall_1.transform.SetParent(globeTransform, false);
-        Wall_1.transform.localScale = new Vector3(1750f, CornerAltDistance, 100f);
-        Wall_1.name = "Wall " + 1 + " " + wallCoordinateData[1].longitude + ", " + wallCoordinateData[1].latitude + ", " + wallCoordinateData[1].altitude;
-        AddCesiumGlobeAnchor(Wall_1, wallCoordinateData[1], 0);
-        CesiumGlobeAnchor cesiumanchor1 = Wall_1.GetComponent<CesiumGlobeAnchor>();
-        cesiumanchor1.rotationEastUpNorth = Quaternion.Euler(0, 15, 0);
-
-        GameObject Wall_2 = Instantiate(NoFlightWallPrefab);
-        Wall_2.transform.SetParent(globeTransform, false);
-        Wall_2.transform.localScale = new Vector3(2250f, CornerAltDistance, 100f);
-        Wall_2.name = "Wall " + 2 + " " + wallCoordinateData[2].longitude + ", " + wallCoordinateData[2].latitude + ", " + wallCoordinateData[2].altitude;
-        AddCesiumGlobeAnchor(Wall_2, wallCoordinateData[2], 0);
-        CesiumGlobeAnchor cesiumanchor2 = Wall_2.GetComponent<CesiumGlobeAnchor>();
-        cesiumanchor2.rotationEastUpNorth = Quaternion.Euler(0, 90, 0);
-
-        GameObject Wall_3 = Instantiate(NoFlightWallPrefab);
-        Wall_3.transform.SetParent(globeTransform, false);
-        Wall_3.transform.localScale = new Vector3(4450f, CornerAltDistance, 100f);
-        Wall_3.name = "Wall " + 3 + " " + wallCoordinateData[3].longitude + ", " + wallCoordinateData[3].latitude + ", " + wallCoordinateData[3].altitude;
-        AddCesiumGlobeAnchor(Wall_3, wallCoordinateData[3], 0);
-        CesiumGlobeAnchor cesiumanchor3 = Wall_3.GetComponent<CesiumGlobeAnchor>();
-        cesiumanchor3.rotationEastUpNorth = Quaternion.Euler(0, 0, 0);
-
-        GameObject Wall_4 = Instantiate(NoFlightWallPrefab);
-        Wall_4.transform.SetParent(globeTransform, false);
-        Wall_4.transform.localScale = new Vector3(2500f, CornerAltDistance, 100f);
-        Wall_4.name = "Wall " + 4 + " " + wallCoordinateData[4].longitude + ", " + wallCoordinateData[4].latitude + ", " + wallCoordinateData[4].altitude;
-        AddCesiumGlobeAnchor(Wall_4, wallCoordinateData[4], 0);
-        CesiumGlobeAnchor cesiumanchor4 = Wall_4.GetComponent<CesiumGlobeAnchor>();
-        cesiumanchor4.rotationEastUpNorth = Quaternion.Euler(0, -59, 0);
-
-
     }
-
-
-
 
     // Update is called once per frame
     void Update()
@@ -156,8 +128,9 @@ public class NoFlightZoneVisualizer : MonoBehaviour
         cesiumanchor.latitude = coordinate.latitude;
         cesiumanchor.longitude = coordinate.longitude;
         cesiumanchor.height = coordinate.altitude;
-        //first  long , second alt, third lat
-        cesiumanchor.rotationEastUpNorth = Quaternion.Euler(0, 0, 0);
+
+        // rotate game object on it's own axis
+        cesiumanchor.rotationEastUpNorth = Quaternion.Euler(0, wallRotationAlt, 0);
     }
     
     void RotateTowardsNextWaypoint(float currentLatitude, float currentLongitude, float currentAltitude, float nextLatitude, float nextLongitude, float nextAltitude)

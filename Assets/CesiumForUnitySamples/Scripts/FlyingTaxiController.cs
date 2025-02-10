@@ -29,6 +29,8 @@ public class FlyingTaxiController : MonoBehaviour
         globeAnchor = flyingTaxi.AddComponent<CesiumGlobeAnchor>();
 
         SetFlyingTaxiPosition(coordinateData[0].latitude, coordinateData[0].longitude, coordinateData[0].altitude);
+
+        globeAnchor.rotationEastUpNorth = Quaternion.Euler(-90, 45, 0);
     }
 
     void Update()
@@ -117,8 +119,6 @@ Debug.Log($"Rotation in Euler-Winkeln: Pitch = {eulerAngles.x}, Yaw = {eulerAngl
         globeAnchor.latitude = latitude;
         globeAnchor.longitude = longitude;
         globeAnchor.height = altitude;
-        globeAnchor.rotationEastUpNorth = Quaternion.Euler(-90, 45, 0);
-
     }
 
     [System.Serializable]
